@@ -3,63 +3,54 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login — EventFlow</title>
-    <meta name="description" content="Sign in to EventFlow to manage and join events."/>
+    <title>Gateway — EventFlow</title>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body>
-<div class="auth-page">
-    <div class="auth-card">
+<body class="auth-wrapper animate-in" style="display:flex; align-items:center; justify-content:center; padding:2rem;">
 
-        <!-- Logo -->
-        <div class="auth-logo">
-            <span class="logo-icon">🎪</span>
-            <h1>EventFlow</h1>
-            <p>Online Event Management System</p>
+    <div class="card glass auth-card" style="width:100%; max-width:440px; padding:3.5rem 3rem;">
+        
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2.5rem;">
+            <div style="font-size:3rem; margin-bottom:1rem; display:inline-block; filter: drop-shadow(var(--shadow-glow));">🎪</div>
+            <h1 class="brand-font" style="font-size:2.2rem; margin-bottom:0.5rem; background:linear-gradient(135deg, white, var(--primary-light)); -webkit-background-clip:text; color:transparent;">Portal Access</h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Sign in to orchestrate your experiences.</p>
         </div>
 
         <!-- Alerts -->
-        <div th:if="${errorMsg}" class="alert alert-error">
-            ❌ <span th:text="${errorMsg}"></span>
+        <div th:if="${errorMsg}" class="alert alert-error glass" style="margin-bottom:1.5rem; font-size:0.85rem; padding:0.75rem 1rem;">
+            <span>⚠️</span> <span th:text="${errorMsg}"></span>
         </div>
-        <div th:if="${logoutMsg}" class="alert alert-success">
-            ✅ <span th:text="${logoutMsg}"></span>
-        </div>
-        <div th:if="${successMsg}" class="alert alert-success">
-            ✅ <span th:text="${successMsg}"></span>
+        <div th:if="${logoutMsg}" class="alert alert-success glass" style="margin-bottom:1.5rem; font-size:0.85rem; padding:0.75rem 1rem;">
+            <span>✨</span> <span th:text="${logoutMsg}"></span>
         </div>
 
-        <!-- Login Form -->
-        <form th:action="@{/login}" method="post">
-            <div class="form-group">
-                <label class="form-label" for="email">📧 Email Address</label>
-                <input type="email" id="email" name="email" class="form-control"
-                       placeholder="your@email.com" required autofocus/>
+        <!-- Form -->
+        <form th:action="@{/login}" method="post" style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div>
+                <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Identity</label>
+                <input type="email" name="email" class="form-control" placeholder="address@domain.com" required autofocus/>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="password">🔒 Password</label>
-                <input type="password" id="password" name="password" class="form-control"
-                       placeholder="Enter your password" required/>
+            <div>
+                <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Secret Key</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
             </div>
 
-            <button type="submit" id="login-btn" class="btn btn-primary btn-block btn-lg" style="margin-top:0.5rem;">
-                🚀 Sign In
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1.1rem; border-radius:99px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; margin-top:1rem;">
+                Authenticate
             </button>
         </form>
 
-        <div class="auth-divider">or</div>
-
-        <!-- Register Link -->
-        <div class="text-center">
-            <p style="color: var(--text-secondary); font-size: 0.88rem;">
-                Don't have an account?
-                <a th:href="@{/register}" style="color: var(--primary); font-weight:600;">Create Account →</a>
+        <!-- Footer -->
+        <div style="margin-top:2.5rem; text-align:center; padding-top:2rem; border-top:1px solid var(--border-color);">
+            <p style="color:var(--text-muted); font-size:0.88rem;">
+                New to the platform? 
+                <a th:href="@{/register}" style="color:var(--primary); font-weight:700; margin-left:0.5rem;">Initialize Account</a>
             </p>
         </div>
 
-
     </div>
-</div>
+
 </body>
 </html>

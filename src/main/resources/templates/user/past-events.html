@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Past Events — EventFlow</title>
-    <meta name="description" content="View past events and their photo galleries."/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body class="app-wrapper">
+<body class="app-wrapper animate-in">
 
 <div th:replace="~{fragments :: navbar}"></div>
 
 <main class="main-content">
 
-    <div class="page-header">
+    <div class="page-header" style="margin-top:2rem;">
         <div>
-            <h1 class="page-title">🏆 Past Events</h1>
-            <p class="page-subtitle">Completed events with photo galleries</p>
+            <h1 class="page-title">Event Archives</h1>
+            <p class="page-subtitle">Relive the highlights from our previous gatherings</p>
         </div>
     </div>
 
@@ -24,66 +24,64 @@
     <div th:replace="~{fragments :: alerts}"></div>
 
     <!-- Empty State -->
-    <div th:if="${events.isEmpty()}" class="empty-state">
-        <div class="empty-state-icon">🗓️</div>
-        <h3>No Past Events Yet</h3>
-        <p>Completed events with photos will appear here.</p>
-        <a th:href="@{/events/upcoming}" class="btn btn-primary mt-2">Browse Upcoming Events</a>
+    <div th:if="${events.isEmpty()}" style="text-align:center; padding:6rem 2rem;">
+        <div style="font-size:3.5rem; margin-bottom:1rem; opacity:0.3;">🎞️</div>
+        <h3 class="brand-font" style="font-size:1.5rem; color:var(--text-primary);">History in the making</h3>
+        <p style="color:var(--text-muted);">Completed events will appear here once archived.</p>
     </div>
 
-    <!-- Events List with Gallery -->
-    <div th:unless="${events.isEmpty()}">
-        <div th:each="event : ${events}" class="card mb-3" style="overflow:visible;">
-
-            <!-- Event Header -->
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title" th:text="${event.title}">Event Title</h2>
-                    <div class="event-meta" style="margin-top:0.5rem;">
-                        <div class="event-meta-item">
-                            <span class="icon">📆</span>
-                            <span th:text="${#temporals.format(event.date, 'dd MMMM yyyy')}">Date</span>
-                        </div>
-                        <div class="event-meta-item">
-                            <span class="icon">📍</span>
-                            <span th:text="${event.location}">Location</span>
-                        </div>
+    <!-- Events Cards -->
+    <div th:unless="${events.isEmpty()}" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap:2.5rem;">
+        <div th:each="event : ${events}" class="card glass" style="padding:0; display:flex; flex-direction:column; border-radius:var(--radius-xl);">
+            
+            <div style="padding:2rem;">
+                <div style="margin-bottom:1.5rem;">
+                    <span class="badge" style="background:rgba(34,197,94,0.15); color:var(--success); font-weight:800; text-transform:uppercase; letter-spacing:0.1em; font-size:0.7rem; padding:0.4rem 1rem; border-radius:99px;">Archived</span>
+                </div>
+                
+                <h2 class="brand-font" style="font-size:1.6rem; color:var(--text-primary); margin-bottom:0.75rem;" th:text="${event.title}">Event Title</h2>
+                <div style="display:flex; align-items:center; gap:1rem; color:var(--text-secondary); font-size:0.85rem; margin-bottom:1.5rem;">
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                        <span>📅</span> <span th:text="${#temporals.format(event.date, 'MMM yyyy')}">Date</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                        <span>📍</span> <span th:text="${event.location}">Location</span>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:1rem;">
-                    <span class="badge badge-completed">✅ Completed</span>
-                    <a th:href="@{/events/{id}/gallery(id=${event.id})}" class="btn btn-outline btn-sm">
-                        🖼️ Full Gallery
-                    </a>
+
+                <!-- Preview Gallery -->
+                <div th:with="photos=${event.media}" style="margin-top:1rem;">
+                    <div th:if="${photos.isEmpty()}" style="padding:2rem; background:rgba(255,255,255,0.02); border-radius:var(--radius-md); text-align:center; border:1px dashed var(--border-color);">
+                        <span style="font-size:1.2rem; display:block; margin-bottom:0.5rem;">📸</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">No media uploaded for this event.</span>
+                    </div>
+                    
+                    <div th:unless="${photos.isEmpty()}" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.75rem;">
+                        <div th:each="photo, iter : ${photos}" th:if="${iter.index < 3}" class="photo-item" style="aspect-ratio:1/1; border-radius:var(--radius-md); border-color:var(--border-color);">
+                            <img th:src="@{${photo.filePath}}" alt="Preview" style="filter: brightness(0.8);"/>
+                        </div>
+                        
+                        <!-- More indicator or 4th photo -->
+                        <div th:if="${photos.size() >= 4}" class="photo-item glass" 
+                             style="display:flex; align-items:center; justify-content:center; cursor:pointer; aspect-ratio:1/1; border-radius:var(--radius-md); border-color:var(--border-color);"
+                             th:data-href="@{/events/{id}/gallery(id=${event.id})}"
+                             onclick="window.location.href=this.getAttribute('data-href')">
+                            <div style="text-align:center;">
+                                <div style="font-size:1.1rem; font-weight:800; color:var(--text-primary);">+<span th:text="${photos.size() - 3}">0</span></div>
+                                <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">More</div>
+                            </div>
+                        </div>
+                        <div th:if="${photos.size() == 3}" class="photo-item" style="aspect-ratio:1/1; border-radius:var(--radius-md); border-color:var(--border-color); background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; border:1px dashed var(--border-color);">
+                             <span style="font-size:1.4rem; opacity:0.1;">📽️</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Description -->
-            <p th:text="${event.description}" style="color: var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;"></p>
-
-            <!-- Photos Preview (up to 4) -->
-            <div th:with="photos=${event.media}">
-                <div th:if="${photos.isEmpty()}" style="color:var(--text-muted); font-size:0.85rem; padding:1rem; text-align:center; border:1px dashed var(--border-color); border-radius:var(--radius-sm);">
-                    📷 No photos uploaded yet for this event.
-                </div>
-                <div th:unless="${photos.isEmpty()}" class="photo-grid">
-                    <div th:each="photo, stat : ${photos}" th:if="${stat.index < 4}" class="photo-item">
-                        <img th:src="@{${photo.filePath}}" th:alt="${photo.fileName}" loading="lazy"/>
-                        <div class="photo-overlay">
-                            <a th:href="@{/events/{id}/gallery(id=${event.id})}" class="btn btn-outline btn-sm">View All</a>
-                        </div>
-                    </div>
-                    <!-- More indicator -->
-                    <div th:if="${photos.size() > 4}" class="photo-item"
-                         style="display:flex; align-items:center; justify-content:center; background:var(--bg-hover); cursor:pointer;"
-                     th:data-href="@{/events/{id}/gallery(id=${event.id})}"
-                     onclick="window.location.href=this.getAttribute('data-href')">
-                        <div style="text-align:center; color:var(--text-secondary);">
-                            <div style="font-size:1.5rem;">🖼️</div>
-                            <div style="font-size:0.85rem; font-weight:600;">+<span th:text="${photos.size() - 4}">0</span> more</div>
-                        </div>
-                    </div>
-                </div>
+            <div style="padding:1.5rem 2rem; background:rgba(0,0,0,0.2); border-top:1px solid var(--border-color);">
+                <a th:href="@{/events/{id}/gallery(id=${event.id})}" class="btn btn-primary" style="width:100%; justify-content:center; border-radius:99px; padding:0.9rem;">
+                    <span style="font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Access Full Gallery</span>
+                </a>
             </div>
 
         </div>
@@ -94,3 +92,4 @@
 <div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>
+

@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: event-management-system
+    env: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /login
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: event-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: event-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: event-db
+          property: password
+    disk:
+      name: uploads-disk
+      mountPath: /data/uploads
+      sizeGB: 1
+
+databases:
+  - name: event-db
+    type: postgres
+    plan: free
+    region: singapore

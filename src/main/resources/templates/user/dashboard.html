@@ -5,99 +5,107 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>My Dashboard — EventFlow</title>
-    <meta name="description" content="View your event registrations and upcoming events."/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body class="app-wrapper">
+<body class="app-wrapper animate-in">
 
 <div th:replace="~{fragments :: navbar}"></div>
 
 <main class="main-content">
 
     <!-- Page Header -->
-    <div class="page-header">
+    <div class="page-header" style="margin-top:2rem;">
         <div>
-            <h1 class="page-title">👋 Welcome, <span th:text="${user.name}">User</span>!</h1>
-            <p class="page-subtitle">Here's your event activity overview</p>
+            <h1 class="page-title">Welcome back, <span th:text="${user.name}">User</span>! 👋</h1>
+            <p class="page-subtitle">Personalized overview of your event journey</p>
         </div>
-        <a th:href="@{/events/upcoming}" class="btn btn-primary">📅 Browse Events</a>
+        <a th:href="@{/events/upcoming}" class="btn btn-primary">
+            <span>📅</span> Browse New Events
+        </a>
     </div>
 
-    <!-- Flash Alerts -->
-    <div th:replace="~{fragments :: alerts}"></div>
-
-    <!-- Stat Cards -->
+    <!-- Stats -->
     <div class="stat-grid">
-        <div class="stat-card purple">
-            <div class="stat-icon purple">📅</div>
+        <div class="stat-card glass">
+            <div class="stat-icon">🔥</div>
             <div>
                 <div class="stat-value" th:text="${upcomingCount}">0</div>
-                <div class="stat-label">Upcoming Events</div>
+                <div class="stat-label">Upcoming Near You</div>
             </div>
         </div>
-        <div class="stat-card green">
-            <div class="stat-icon green">✅</div>
+        <div class="stat-card glass">
+            <div class="stat-icon">🎓</div>
             <div>
                 <div class="stat-value" th:text="${registeredCount}">0</div>
-                <div class="stat-label">My Registrations</div>
+                <div class="stat-label">Registrations Active</div>
             </div>
         </div>
-        <div class="stat-card orange">
-            <div class="stat-icon orange">🖼️</div>
+        <div class="stat-card glass">
+            <div class="stat-icon">💎</div>
             <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Past Events Gallery</div>
+                <div class="stat-value">PRO</div>
+                <div class="stat-label">Membership Tier</div>
             </div>
         </div>
     </div>
 
-    <!-- My Registrations -->
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">📋 My Event Registrations</span>
-            <a th:href="@{/events/upcoming}" class="btn btn-outline btn-sm">View All Events</a>
+    <!-- Active List -->
+    <div class="card glass">
+        <div class="card-header" style="background:transparent; border-bottom:1px solid var(--border-color); padding-bottom:1.25rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <span style="font-size:1.4rem;">📊</span>
+                <span class="card-title brand-font" style="font-size:1.2rem; margin:0;">Engagement Summary</span>
+            </div>
         </div>
 
-        <div th:if="${myRegistrations.isEmpty()}" class="empty-state">
-            <div class="empty-state-icon">🎫</div>
-            <h3>No Registrations Yet</h3>
-            <p>Browse upcoming events and sign up for one!</p>
-            <a th:href="@{/events/upcoming}" class="btn btn-primary mt-2">Browse Events</a>
+        <div th:if="${myRegistrations.isEmpty()}" style="text-align:center; padding:4rem 2rem;">
+            <div style="font-size:3rem; margin-bottom:1rem; opacity:0.3;">🎫</div>
+            <h3 style="margin-bottom:0.5rem; color:var(--text-primary);">No active tickets yet</h3>
+            <p style="color:var(--text-muted); margin-bottom:1.5rem;">Discover exclusive local events tailored for you.</p>
+            <a th:href="@{/events/upcoming}" class="btn btn-primary">Find Events</a>
         </div>
 
         <div th:unless="${myRegistrations.isEmpty()}" class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>Event</th>
-                        <th>Date</th>
-                        <th>Location</th>
+                        <th>Event Identity</th>
+                        <th>Temporal Info</th>
+                        <th>Venue</th>
                         <th>Status</th>
-                        <th>Registered On</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="reg : ${myRegistrations}">
                         <td>
-                            <strong th:text="${reg.event.title}">Event Name</strong>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-weight:700; color:var(--text-primary); font-size:1rem;" th:text="${reg.event.title}">Event Name</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);" th:text="${reg.event.category}">Category</span>
+                            </div>
                         </td>
-                        <td th:text="${#temporals.format(reg.event.date, 'dd MMM yyyy')}">Date</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary);">
+                                <span style="opacity:0.7;">📅</span>
+                                <span th:text="${#temporals.format(reg.event.date, 'dd MMM yyyy')}">Date</span>
+                            </div>
+                        </td>
                         <td th:text="${reg.event.location}">Location</td>
                         <td>
-                            <span class="badge badge-upcoming" th:if="${reg.event.status.name() == 'UPCOMING'}">📅 Upcoming</span>
-                            <span class="badge badge-completed" th:if="${reg.event.status.name() == 'COMPLETED'}">✅ Completed</span>
+                            <span class="badge badge-upcoming" th:if="${reg.event.status.name() == 'UPCOMING'}">Upcoming</span>
+                            <span class="badge badge-completed" th:if="${reg.event.status.name() == 'COMPLETED'}">Completed</span>
                         </td>
-                        <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy HH:mm')}">Registered</td>
                         <td>
-                            <form th:if="${reg.event.status.name() == 'UPCOMING'}"
-                                  th:action="@{/events/{id}/cancel(id=${reg.event.id})}" method="post"
-                                  onsubmit="return confirm('Cancel registration?')">
-                                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
-                            </form>
-                            <a th:if="${reg.event.status.name() == 'COMPLETED'}"
-                               th:href="@{/events/{id}/gallery(id=${reg.event.id})}"
-                               class="btn btn-outline btn-sm">🖼️ Gallery</a>
+                            <div style="display:flex; gap:0.5rem;">
+                                <form th:if="${reg.event.status.name() == 'UPCOMING'}"
+                                      th:action="@{/events/{id}/cancel(id=${reg.event.id})}" method="post"
+                                      onsubmit="return confirm('Relinquish this registration?')">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:rgba(239, 68, 68, 0.2);">Cancel</button>
+                                </form>
+                                <a th:if="${reg.event.status.name() == 'COMPLETED'}"
+                                   th:href="@{/events/{id}/gallery(id=${reg.event.id})}"
+                                   class="btn btn-primary btn-sm">VIEW MEMORIES</a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -110,3 +118,4 @@
 <div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>
+

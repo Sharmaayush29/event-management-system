@@ -3,73 +3,68 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Register — EventFlow</title>
-    <meta name="description" content="Create your free EventFlow account to join and manage events."/>
+    <title>Onboarding — EventFlow</title>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body>
-<div class="auth-page">
-    <div class="auth-card">
+<body class="auth-wrapper animate-in" style="display:flex; align-items:center; justify-content:center; padding:2rem;">
 
-        <!-- Logo -->
-        <div class="auth-logo">
-            <span class="logo-icon">🎪</span>
-            <h1>Create Account</h1>
-            <p>Join EventFlow today — it's free!</p>
+    <div class="card glass auth-card" style="width:100%; max-width:500px; padding:3.5rem 3rem;">
+        
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2.5rem;">
+            <div style="font-size:3rem; margin-bottom:1rem; display:inline-block; filter: drop-shadow(var(--shadow-glow));">✨</div>
+            <h1 class="brand-font" style="font-size:2.2rem; margin-bottom:0.5rem; background:linear-gradient(135deg, white, var(--accent)); -webkit-background-clip:text; color:transparent;">Join the Flow</h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Initialize your profile to participate in events.</p>
         </div>
 
         <!-- Alerts -->
-        <div th:if="${errorMsg}" class="alert alert-error">
-            ❌ <span th:text="${errorMsg}"></span>
+        <div th:if="${errorMsg}" class="alert alert-error glass" style="margin-bottom:1.5rem; font-size:0.85rem; padding:0.75rem 1rem;">
+            <span>⚠️</span> <span th:text="${errorMsg}"></span>
         </div>
 
-        <!-- Register Form -->
-        <form th:action="@{/register}" method="post" id="register-form">
-            <div class="form-group">
-                <label class="form-label" for="name">👤 Full Name</label>
-                <input type="text" id="name" name="name" class="form-control"
-                       placeholder="Your full name" required/>
+        <!-- Form -->
+        <form th:action="@{/register}" method="post" style="display:flex; flex-direction:column; gap:1.25rem;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                <div>
+                    <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="John Doe" required/>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Roll Number</label>
+                    <input type="text" name="rollNo" class="form-control" placeholder="22CS101" style="text-transform:uppercase;"/>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="rollNo">🎓 Roll Number</label>
-                <input type="text" id="rollNo" name="rollNo" class="form-control"
-                       placeholder="e.g. 22CS101" style="text-transform:uppercase;"/>
+            <div>
+                <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="address@domain.com" required/>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="email">📧 Email Address</label>
-                <input type="email" id="email" name="email" class="form-control"
-                       placeholder="your@email.com" required/>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                <div>
+                    <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" minlength="6" required/>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.6rem; font-weight:700;">Confirm</label>
+                    <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" required/>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="password">🔒 Password</label>
-                <input type="password" id="password" name="password" class="form-control"
-                       placeholder="Min 6 characters" minlength="6" required/>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="confirmPassword">🔒 Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
-                       placeholder="Repeat your password" required/>
-            </div>
-
-            <button type="submit" id="register-btn" class="btn btn-primary btn-block btn-lg" style="margin-top:0.5rem;">
-                ✨ Create Account
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1.1rem; border-radius:99px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; margin-top:0.5rem;">
+                Initialize Profile
             </button>
         </form>
 
-        <div class="auth-divider">or</div>
-
-        <div class="text-center">
-            <p style="color: var(--text-secondary); font-size: 0.88rem;">
-                Already have an account?
-                <a th:href="@{/login}" style="color: var(--primary); font-weight:600;">Sign In →</a>
+        <!-- Footer -->
+        <div style="margin-top:2.5rem; text-align:center; padding-top:2rem; border-top:1px solid var(--border-color);">
+            <p style="color:var(--text-muted); font-size:0.88rem;">
+                Already have an account? 
+                <a th:href="@{/login}" style="color:var(--primary); font-weight:700; margin-left:0.5rem;">Portal Access</a>
             </p>
         </div>
 
     </div>
-</div>
+
 </body>
 </html>

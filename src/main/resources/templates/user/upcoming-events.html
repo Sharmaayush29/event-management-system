@@ -5,19 +5,18 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Upcoming Events — EventFlow</title>
-    <meta name="description" content="Browse and register for all upcoming events."/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body class="app-wrapper">
+<body class="app-wrapper animate-in">
 
 <div th:replace="~{fragments :: navbar}"></div>
 
 <main class="main-content">
 
-    <div class="page-header">
+    <div class="page-header" style="margin-top:2rem;">
         <div>
-            <h1 class="page-title">📅 Upcoming Events</h1>
-            <p class="page-subtitle">Browse and register for future events</p>
+            <h1 class="page-title">Upcoming Experiences</h1>
+            <p class="page-subtitle">Curated events scheduled in the near future</p>
         </div>
     </div>
 
@@ -25,53 +24,54 @@
     <div th:replace="~{fragments :: alerts}"></div>
 
     <!-- Empty State -->
-    <div th:if="${events.isEmpty()}" class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <h3>No Upcoming Events</h3>
-        <p>Check back soon — new events will be added!</p>
+    <div th:if="${events.isEmpty()}" style="text-align:center; padding:6rem 2rem;">
+        <div style="font-size:3.5rem; margin-bottom:1rem; opacity:0.3;">🔭</div>
+        <h3 class="brand-font" style="font-size:1.5rem; color:var(--text-primary);">The horizon is clear</h3>
+        <p style="color:var(--text-muted);">New events are being planned behind the scenes. Check back shortly.</p>
     </div>
 
     <!-- Events Grid -->
-    <div th:unless="${events.isEmpty()}" class="events-grid">
-        <div th:each="event : ${events}" class="event-card">
-
-            <div class="event-card-header">
-                <div>
-                    <h2 class="event-title" th:text="${event.title}">Event Title</h2>
-                    <span class="badge badge-upcoming">📅 Upcoming</span>
+    <div th:unless="${events.isEmpty()}" class="events-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap:2rem;">
+        <div th:each="event : ${events}" class="card glass" style="padding:0; display:flex; flex-direction:column; border-radius:var(--radius-xl);">
+            
+            <div style="padding:2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+                    <span class="badge" style="background:rgba(139,92,246,0.15); color:var(--primary); font-weight:800; text-transform:uppercase; letter-spacing:0.1em; font-size:0.7rem; padding:0.4rem 1rem; border-radius:99px;" th:text="${event.category ?: 'General'}">Category</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">ACTIVE</span>
+                </div>
+                
+                <h2 class="brand-font" style="font-size:1.4rem; color:var(--text-primary); margin-bottom:0.75rem; line-height:1.3;" th:text="${event.title}">Event Title</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;" th:text="${event.description}">Description</p>
+                
+                <div style="display:flex; flex-direction:column; gap:0.75rem; padding-top:1.25rem; border-top:1px solid var(--border-color);">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <span style="font-size:1.1rem; opacity:0.8;">📅</span>
+                        <span style="font-size:0.88rem; font-weight:600; color:var(--text-primary);" th:text="${#temporals.format(event.date, 'EEEE, dd MMMM yyyy')}">Date</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <span style="font-size:1.1rem; opacity:0.8;">📍</span>
+                        <span style="font-size:0.88rem; color:var(--text-secondary);" th:text="${event.location}">Location</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="event-card-body">
-                <p class="event-description" th:text="${event.description}">Description</p>
-                <div class="event-meta">
-                    <div class="event-meta-item">
-                        <span class="icon">📆</span>
-                        <span th:text="${#temporals.format(event.date, 'EEEE, dd MMMM yyyy')}">Date</span>
-                    </div>
-                    <div class="event-meta-item">
-                        <span class="icon">📍</span>
-                        <span th:text="${event.location}">Location</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="event-card-footer">
+            <div style="padding:1.5rem 2rem; background:rgba(0,0,0,0.2); border-top:1px solid var(--border-color); margin-top:auto;">
                 <!-- Already registered -->
-                <div th:if="${registeredEventIds.contains(event.id)}" style="display:flex; gap:0.75rem; width:100%; align-items:center;">
-                    <span class="badge badge-completed" style="flex:1; justify-content:center;">✅ Registered</span>
+                <div th:if="${registeredEventIds.contains(event.id)}" style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; color:var(--success); font-weight:700; font-size:0.9rem;">
+                        <span>✅</span> Confirmed
+                    </div>
                     <form th:action="@{/events/{id}/cancel(id=${event.id})}" method="post"
-                          onsubmit="return confirm('Cancel registration for this event?')">
-                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                          onsubmit="return confirm('Relinquish your spot for this event?')">
+                        <button type="submit" class="btn btn-outline btn-sm" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--danger); border-color:rgba(239, 68, 68, 0.2);">Cancel Spot</button>
                     </form>
                 </div>
 
                 <!-- Not yet registered -->
-                <div th:unless="${registeredEventIds.contains(event.id)}" style="width:100%;">
-                    <form th:action="@{/events/{id}/register(id=${event.id})}" method="post"
-                          style="width:100%;">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            🎫 Register Now
+                <div th:unless="${registeredEventIds.contains(event.id)}">
+                    <form th:action="@{/events/{id}/register(id=${event.id})}" method="post">
+                        <button type="submit" class="btn btn-primary" style="width:100%; border-radius:99px; padding:0.9rem;">
+                            <span style="font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Claim Ticket</span>
                         </button>
                     </form>
                 </div>
@@ -85,3 +85,4 @@
 <div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>
+
