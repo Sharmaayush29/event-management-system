@@ -10,9 +10,9 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Build-time environment variable for data directory (Render's Persistent Disk path)
-ENV APP_UPLOAD_DIR=/data/uploads
-RUN mkdir -p /data/uploads
+# Environment variable for uploads (Ephemeral on Render Free Tier)
+ENV APP_UPLOAD_DIR=/tmp/uploads
+RUN mkdir -p /tmp/uploads && chmod 777 /tmp/uploads
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
