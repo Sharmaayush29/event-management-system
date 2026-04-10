@@ -8,18 +8,32 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SPRING_DATASOURCE_URL
+      - key: DB_HOST
         fromDatabase:
           name: event-db
-          property: connectionString
-      - key: SPRING_DATASOURCE_USERNAME
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: event-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: event-db
+          property: database
+      - key: DB_USER
         fromDatabase:
           name: event-db
           property: user
-      - key: SPRING_DATASOURCE_PASSWORD
+      - key: DB_PASS
         fromDatabase:
           name: event-db
           property: password
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 
 databases:
   - name: event-db

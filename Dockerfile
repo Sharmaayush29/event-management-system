@@ -14,5 +14,5 @@ COPY --from=build /app/target/*.jar app.jar
 ENV APP_UPLOAD_DIR=/tmp/uploads
 RUN mkdir -p /tmp/uploads && chmod 777 /tmp/uploads
 
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 10000
+ENTRYPOINT ["java", "-Dserver.port=${PORT:10000}", "-jar", "app.jar"]
