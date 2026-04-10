@@ -27,6 +27,5 @@ services:
 
 databases:
   - name: event-db
-    type: postgres
     plan: free
     region: singapore
