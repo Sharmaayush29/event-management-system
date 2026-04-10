@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Upload Photos — EventFlow</title>
+    <meta name="description" content="Admin: Upload event photos for gallery."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📷 Upload Photos</h1>
+            <p class="page-subtitle" th:text="'Event: ' + ${event.title}">Event Name</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline">← Back to Dashboard</a>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Upload Form -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <span class="card-title">📤 Upload New Photos</span>
+            <span style="color:var(--text-muted); font-size:0.8rem;">Accepted: JPG, PNG, GIF, WEBP (max 10MB each)</span>
+        </div>
+
+        <form th:action="@{/admin/events/{id}/photos(id=${event.id})}"
+              method="post"
+              enctype="multipart/form-data"
+              id="upload-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('photoInput').click()">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text"><strong>Click to select photos</strong> or drag and drop</div>
+                <div class="upload-hint">Multiple files allowed</div>
+                <div id="file-list" style="margin-top:1rem; color:var(--text-secondary); font-size:0.82rem;"></div>
+            </div>
+
+            <input type="file" id="photoInput" name="photos" multiple accept="image/*"
+                   style="display:none;" onchange="handleFileSelect(this)"/>
+
+            <div style="display:flex; gap:1rem; margin-top:1.25rem;">
+                <button type="submit" id="upload-btn" class="btn btn-primary btn-lg" disabled>
+                    🚀 Upload Photos
+                </button>
+                <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Current Photos -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">🖼️ Uploaded Photos (<span th:text="${photos.size()}">0</span>)</span>
+        </div>
+
+        <div th:if="${photos.isEmpty()}" class="empty-state" style="padding:2rem;">
+            <div class="empty-state-icon">📭</div>
+            <h3>No Photos Yet</h3>
+            <p>Upload photos above to populate the gallery.</p>
+        </div>
+
+        <div th:unless="${photos.isEmpty()}" class="photo-grid">
+            <div th:each="photo : ${photos}" class="photo-item">
+                <img th:src="@{${photo.filePath}}" th:alt="${photo.fileName}" loading="lazy"/>
+                <div class="photo-overlay">
+                    <form th:action="@{/admin/photos/{id}/delete(id=${photo.id})}"
+                          method="post"
+                          onsubmit="return confirm('Delete this photo?')">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="eventId" th:value="${event.id}"/>
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+const uploadZone = document.getElementById('upload-zone');
+const uploadBtn  = document.getElementById('upload-btn');
+const fileList   = document.getElementById('file-list');
+
+function handleFileSelect(input) {
+    const files = Array.from(input.files);
+    if (files.length > 0) {
+        fileList.innerHTML = '📁 Selected: ' + files.map(f => f.name).join(', ');
+        uploadBtn.disabled = false;
+    } else {
+        fileList.innerHTML = '';
+        uploadBtn.disabled = true;
+    }
+}
+
+// Drag & Drop
+uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const dt = e.dataTransfer;
+    const input = document.getElementById('photoInput');
+    input.files = dt.files;
+    handleFileSelect(input);
+});
+</script>
+</body>
+</html>

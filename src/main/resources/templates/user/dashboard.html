@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Dashboard — EventFlow</title>
+    <meta name="description" content="View your event registrations and upcoming events."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">👋 Welcome, <span th:text="${user.name}">User</span>!</h1>
+            <p class="page-subtitle">Here's your event activity overview</p>
+        </div>
+        <a th:href="@{/events/upcoming}" class="btn btn-primary">📅 Browse Events</a>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+        <div class="stat-card purple">
+            <div class="stat-icon purple">📅</div>
+            <div>
+                <div class="stat-value" th:text="${upcomingCount}">0</div>
+                <div class="stat-label">Upcoming Events</div>
+            </div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-value" th:text="${registeredCount}">0</div>
+                <div class="stat-label">My Registrations</div>
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon orange">🖼️</div>
+            <div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Past Events Gallery</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Registrations -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📋 My Event Registrations</span>
+            <a th:href="@{/events/upcoming}" class="btn btn-outline btn-sm">View All Events</a>
+        </div>
+
+        <div th:if="${myRegistrations.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">🎫</div>
+            <h3>No Registrations Yet</h3>
+            <p>Browse upcoming events and sign up for one!</p>
+            <a th:href="@{/events/upcoming}" class="btn btn-primary mt-2">Browse Events</a>
+        </div>
+
+        <div th:unless="${myRegistrations.isEmpty()}" class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Registered On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reg : ${myRegistrations}">
+                        <td>
+                            <strong th:text="${reg.event.title}">Event Name</strong>
+                        </td>
+                        <td th:text="${#temporals.format(reg.event.date, 'dd MMM yyyy')}">Date</td>
+                        <td th:text="${reg.event.location}">Location</td>
+                        <td>
+                            <span class="badge badge-upcoming" th:if="${reg.event.status.name() == 'UPCOMING'}">📅 Upcoming</span>
+                            <span class="badge badge-completed" th:if="${reg.event.status.name() == 'COMPLETED'}">✅ Completed</span>
+                        </td>
+                        <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy HH:mm')}">Registered</td>
+                        <td>
+                            <form th:if="${reg.event.status.name() == 'UPCOMING'}"
+                                  th:action="@{/events/{id}/cancel(id=${reg.event.id})}" method="post"
+                                  onsubmit="return confirm('Cancel registration?')">
+                                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                            </form>
+                            <a th:if="${reg.event.status.name() == 'COMPLETED'}"
+                               th:href="@{/events/{id}/gallery(id=${reg.event.id})}"
+                               class="btn btn-outline btn-sm">🖼️ Gallery</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

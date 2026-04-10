@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — EventFlow</title>
+    <meta name="description" content="Admin panel to manage all events and users."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .dash-hero {
+            background: linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(255,101,132,0.08) 100%);
+            border: 1px solid rgba(108,99,255,0.2);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-hero::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -50px;
+            pointer-events: none;
+        }
+        .dash-hero-text h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e2e8f0 0%, #a78bfa 60%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.4rem;
+        }
+        .dash-hero-text p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .dash-hero-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-grid-pro {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card-pro {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card-pro:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .stat-card-pro::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        .stat-card-pro.purple::after { background: linear-gradient(90deg, #6c63ff, #9c8fff); }
+        .stat-card-pro.green::after  { background: linear-gradient(90deg, #22c55e, #86efac); }
+        .stat-card-pro.orange::after { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+        .stat-card-pro.blue::after   { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+        .stat-pro-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        .stat-pro-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .stat-pro-icon.purple { background: rgba(108,99,255,0.15); }
+        .stat-pro-icon.green  { background: rgba(34,197,94,0.15); }
+        .stat-pro-icon.orange { background: rgba(245,158,11,0.15); }
+        .stat-pro-icon.blue   { background: rgba(59,130,246,0.15); }
+        .stat-pro-change {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #22c55e;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+        }
+        .stat-pro-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .stat-pro-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .pro-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+        .pro-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.4rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+        }
+        .pro-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pro-card-title .count-badge {
+            background: rgba(108,99,255,0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(108,99,255,0.25);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+        .search-bar-wrap {
+            position: relative;
+        }
+        .search-bar-wrap input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem 0.9rem 0.5rem 2.4rem;
+            color: var(--text-primary);
+            font-size: 0.84rem;
+            font-family: 'Inter', sans-serif;
+            width: 220px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-bar-wrap input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+            width: 260px;
+        }
+        .search-bar-wrap::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+        .pro-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .pro-table thead th {
+            background: rgba(255,255,255,0.03);
+            padding: 0.85rem 1.4rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .pro-table tbody td {
+            padding: 1rem 1.4rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(42,42,74,0.6);
+            vertical-align: middle;
+        }
+        .pro-table tbody tr:last-child td { border-bottom: none; }
+        .pro-table tbody tr {
+            transition: background 0.15s;
+        }
+        .pro-table tbody tr:hover td {
+            background: rgba(108,99,255,0.04);
+        }
+        .event-name-cell strong {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+        .event-name-cell span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .reg-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(108,99,255,0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(108,99,255,0.2);
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .reg-pill:hover {
+            background: rgba(108,99,255,0.25);
+            color: #c4b5fd;
+            transform: scale(1.05);
+        }
+        .action-group {
+            display: flex;
+            gap: 0.4rem;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-icon:hover { transform: scale(1.1); }
+        .btn-icon.edit:hover { background: rgba(59,130,246,0.15); border-color: #3b82f6; color: #60a5fa; }
+        .btn-icon.complete:hover { background: rgba(34,197,94,0.15); border-color: #22c55e; color: #4ade80; }
+        .btn-icon.photos:hover { background: rgba(245,158,11,0.15); border-color: #f59e0b; color: #fbbf24; }
+        .btn-icon.delete:hover { background: rgba(239,68,68,0.15); border-color: #ef4444; color: #f87171; }
+        .btn-icon.view:hover { background: rgba(108,99,255,0.15); border-color: #6c63ff; color: #a78bfa; }
+        .status-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .status-dot::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-dot.upcoming { color: #60a5fa; }
+        .status-dot.upcoming::before { background: #60a5fa; box-shadow: 0 0 6px #3b82f6; }
+        .status-dot.completed { color: #4ade80; }
+        .status-dot.completed::before { background: #4ade80; box-shadow: 0 0 6px #22c55e; }
+        .empty-pro {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        .empty-pro .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+        .empty-pro h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .empty-pro p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <!-- Hero Header -->
+    <div class="dash-hero">
+        <div class="dash-hero-text">
+            <h1>Admin Dashboard</h1>
+            <p>Manage events, track registrations, and oversee all users</p>
+        </div>
+        <div class="dash-hero-actions">
+            <a th:href="@{/admin/users}" class="btn btn-outline">👥 Manage Users</a>
+            <a th:href="@{/admin/events/create}" class="btn btn-primary">＋ Create Event</a>
+        </div>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Stats Grid -->
+    <div class="stat-grid-pro">
+        <div class="stat-card-pro purple">
+            <div class="stat-pro-top">
+                <div class="stat-pro-icon purple">📅</div>
+                <span class="stat-pro-change">Active</span>
+            </div>
+            <div class="stat-pro-value" th:text="${upcomingCount}">0</div>
+            <div class="stat-pro-label">Upcoming Events</div>
+        </div>
+        <div class="stat-card-pro green">
+            <div class="stat-pro-top">
+                <div class="stat-pro-icon green">✅</div>
+                <span class="stat-pro-change" style="color:#22c55e;">Done</span>
+            </div>
+            <div class="stat-pro-value" th:text="${completedCount}">0</div>
+            <div class="stat-pro-label">Completed Events</div>
+        </div>
+        <div class="stat-card-pro orange">
+            <div class="stat-pro-top">
+                <div class="stat-pro-icon orange">👤</div>
+                <span class="stat-pro-change" style="color:#f59e0b; background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.2);">Total</span>
+            </div>
+            <div class="stat-pro-value" th:text="${userCount}">0</div>
+            <div class="stat-pro-label">Registered Students</div>
+        </div>
+        <div class="stat-card-pro blue">
+            <div class="stat-pro-top">
+                <div class="stat-pro-icon blue">🎪</div>
+                <span class="stat-pro-change" style="color:#60a5fa; background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.2);">All</span>
+            </div>
+            <div class="stat-pro-value" th:text="${allEvents.size()}">0</div>
+            <div class="stat-pro-label">Total Events</div>
+        </div>
+    </div>
+
+    <!-- Events Table Card -->
+    <div class="pro-card">
+        <div class="pro-card-header">
+            <div class="pro-card-title">
+                📋 All Events
+                <span class="count-badge" th:text="${allEvents.size()} + ' total'">0 total</span>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+                <div class="search-bar-wrap">
+                    <input type="text" id="eventSearch" placeholder="Search events..." oninput="filterTable(this, 'eventsTable')"/>
+                </div>
+                <a th:href="@{/admin/events/create}" class="btn btn-primary btn-sm">＋ New Event</a>
+            </div>
+        </div>
+
+        <div th:if="${allEvents.isEmpty()}" class="empty-pro">
+            <div class="empty-icon">📭</div>
+            <h3>No Events Yet</h3>
+            <p>Create your first event to get started.</p>
+            <a th:href="@{/admin/events/create}" class="btn btn-primary">Create Event</a>
+        </div>
+
+        <div th:unless="${allEvents.isEmpty()}" style="overflow-x:auto;">
+            <table class="pro-table" id="eventsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th style="text-align:center;">Registrations</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="event, stat : ${allEvents}">
+                        <td style="color:var(--text-muted); font-weight:600;" th:text="${stat.count}">1</td>
+                        <td class="event-name-cell">
+                            <strong th:text="${event.title}">Title</strong>
+                            <span th:text="${#strings.abbreviate(event.description, 65)}">Desc</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:600;" th:text="${#temporals.format(event.date, 'dd MMM yyyy')}">Date</span>
+                        </td>
+                        <td>
+                            <span style="color:var(--text-secondary);">📍 </span>
+                            <span th:text="${event.location}">Location</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <a th:href="@{/admin/events/{id}/attendees(id=${event.id})}" class="reg-pill">
+                                👥 <span th:text="${event.registrations.size()}">0</span>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="status-dot upcoming" th:if="${event.status.name() == 'UPCOMING'}">Upcoming</span>
+                            <span class="status-dot completed" th:if="${event.status.name() == 'COMPLETED'}">Completed</span>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <!-- View Attendees -->
+                                <a th:href="@{/admin/events/{id}/attendees(id=${event.id})}"
+                                   class="btn-icon view" title="View Attendees">👥</a>
+
+                                <!-- Edit -->
+                                <a th:href="@{/admin/events/{id}/edit(id=${event.id})}"
+                                   class="btn-icon edit" title="Edit Event">✏️</a>
+
+                                <!-- Mark Completed -->
+                                <form th:if="${event.status.name() == 'UPCOMING'}"
+                                      th:action="@{/admin/events/{eventId}/complete(eventId=${event.id})}"
+                                      method="post" style="margin:0;"
+                                      onsubmit="return confirm('Mark this event as completed?')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="btn-icon complete" title="Mark as Completed">✅</button>
+                                </form>
+
+                                <!-- Manage Photos -->
+                                <a th:if="${event.status.name() == 'COMPLETED'}"
+                                   th:href="@{/admin/events/{id}/photos(id=${event.id})}"
+                                   class="btn-icon photos" title="Upload Photos">📸</a>
+
+                                <!-- Delete -->
+                                <form th:action="@{/admin/events/{eventId}/delete(eventId=${event.id})}"
+                                      method="post" style="margin:0;"
+                                      onsubmit="return confirm('Delete this event permanently?')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="btn-icon delete" title="Delete Event">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+function filterTable(input, tableId) {
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelector('#' + tableId + ' tbody').querySelectorAll('tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+}
+</script>
+</body>
+</html>

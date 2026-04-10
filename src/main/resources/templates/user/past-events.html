@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Past Events — EventFlow</title>
+    <meta name="description" content="View past events and their photo galleries."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🏆 Past Events</h1>
+            <p class="page-subtitle">Completed events with photo galleries</p>
+        </div>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Empty State -->
+    <div th:if="${events.isEmpty()}" class="empty-state">
+        <div class="empty-state-icon">🗓️</div>
+        <h3>No Past Events Yet</h3>
+        <p>Completed events with photos will appear here.</p>
+        <a th:href="@{/events/upcoming}" class="btn btn-primary mt-2">Browse Upcoming Events</a>
+    </div>
+
+    <!-- Events List with Gallery -->
+    <div th:unless="${events.isEmpty()}">
+        <div th:each="event : ${events}" class="card mb-3" style="overflow:visible;">
+
+            <!-- Event Header -->
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title" th:text="${event.title}">Event Title</h2>
+                    <div class="event-meta" style="margin-top:0.5rem;">
+                        <div class="event-meta-item">
+                            <span class="icon">📆</span>
+                            <span th:text="${#temporals.format(event.date, 'dd MMMM yyyy')}">Date</span>
+                        </div>
+                        <div class="event-meta-item">
+                            <span class="icon">📍</span>
+                            <span th:text="${event.location}">Location</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <span class="badge badge-completed">✅ Completed</span>
+                    <a th:href="@{/events/{id}/gallery(id=${event.id})}" class="btn btn-outline btn-sm">
+                        🖼️ Full Gallery
+                    </a>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <p th:text="${event.description}" style="color: var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;"></p>
+
+            <!-- Photos Preview (up to 4) -->
+            <div th:with="photos=${event.media}">
+                <div th:if="${photos.isEmpty()}" style="color:var(--text-muted); font-size:0.85rem; padding:1rem; text-align:center; border:1px dashed var(--border-color); border-radius:var(--radius-sm);">
+                    📷 No photos uploaded yet for this event.
+                </div>
+                <div th:unless="${photos.isEmpty()}" class="photo-grid">
+                    <div th:each="photo, stat : ${photos}" th:if="${stat.index < 4}" class="photo-item">
+                        <img th:src="@{${photo.filePath}}" th:alt="${photo.fileName}" loading="lazy"/>
+                        <div class="photo-overlay">
+                            <a th:href="@{/events/{id}/gallery(id=${event.id})}" class="btn btn-outline btn-sm">View All</a>
+                        </div>
+                    </div>
+                    <!-- More indicator -->
+                    <div th:if="${photos.size() > 4}" class="photo-item"
+                         style="display:flex; align-items:center; justify-content:center; background:var(--bg-hover); cursor:pointer;"
+                     th:data-href="@{/events/{id}/gallery(id=${event.id})}"
+                     onclick="window.location.href=this.getAttribute('data-href')">
+                        <div style="text-align:center; color:var(--text-secondary);">
+                            <div style="font-size:1.5rem;">🖼️</div>
+                            <div style="font-size:0.85rem; font-weight:600;">+<span th:text="${photos.size() - 4}">0</span> more</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

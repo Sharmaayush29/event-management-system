@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Manage Media — EventFlow</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .media-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            transition: var(--transition);
+        }
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        .media-preview {
+            aspect-ratio: 16/9;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .media-preview img, .media-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-info {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .media-type-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(108, 99, 255, 0.2);
+            color: var(--primary);
+        }
+        .delete-overlay {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .media-card:hover .delete-overlay {
+            opacity: 1;
+        }
+        .video-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: white;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🎬 Manage Event Media</h1>
+            <p class="page-subtitle" th:text="'Event: ' + ${event.title}">Event Name</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline">← Back to Dashboard</a>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Upload Section -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <span class="card-title">📤 Upload Photos or Videos</span>
+            <span style="color:var(--text-muted); font-size:0.8rem;">Max size: 50MB per file</span>
+        </div>
+
+        <form th:action="@{/admin/events/{id}/media(id=${event.id})}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <div class="upload-zone" onclick="document.getElementById('mediaInput').click()">
+                <div class="upload-icon">📸 / 🎥</div>
+                <div class="upload-text"><strong>Click to select files</strong> or drag and drop</div>
+                <div class="upload-hint">Images (JPG, PNG) or Videos (MP4, MKV)</div>
+                <div id="file-list" style="margin-top:1rem; color:var(--text-secondary); font-size:0.82rem;"></div>
+            </div>
+
+            <input type="file" id="mediaInput" name="files" multiple accept="image/*,video/*"
+                   style="display:none;" onchange="handleFileSelect(this)"/>
+
+            <div style="display:flex; gap:1rem; margin-top:1.25rem;">
+                <button type="submit" id="upload-btn" class="btn btn-primary btn-lg" disabled>
+                    🚀 Start Upload
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Gallery Section -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📦 Event Gallery (<span th:text="${mediaList.size()}">0</span> files)</span>
+        </div>
+
+        <div th:if="${mediaList.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h3>No Media Uploaded</h3>
+            <p>Share photos and videos from the event with your attendees.</p>
+        </div>
+
+        <div th:unless="${mediaList.isEmpty()}" class="media-grid" id="mediaGallery">
+            <div th:each="media : ${mediaList}" class="media-card">
+                <div class="media-preview">
+                    <!-- Image Preview -->
+                    <img th:if="${media.mediaType.name() == 'IMAGE'}" 
+                         th:src="@{${media.filePath}}" th:alt="${media.fileName}"/>
+                    
+                    <!-- Video Preview -->
+                    <video th:if="${media.mediaType.name() == 'VIDEO'}" controls>
+                        <source th:src="@{${media.filePath}}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                
+                <div class="media-info">
+                    <span class="media-type-tag" th:text="${media.mediaType}">Type</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);" 
+                          th:text="${#temporals.format(media.uploadedAt, 'dd MMM yyyy')}">Date</span>
+                </div>
+
+                <div class="delete-overlay">
+                    <form th:action="@{/admin/media/{id}/delete(id=${media.id})}"
+                          method="post"
+                          onsubmit="return confirm('Delete this file permanently?')">
+                        <input type="hidden" name="eventId" th:value="${event.id}"/>
+                        <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.4rem;">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+function handleFileSelect(input) {
+    const files = Array.from(input.files);
+    const fileList = document.getElementById('file-list');
+    const uploadBtn = document.getElementById('upload-btn');
+    
+    if (files.length > 0) {
+        fileList.innerHTML = '📁 Selected: ' + files.map(f => f.name).join(', ');
+        uploadBtn.disabled = false;
+    } else {
+        fileList.innerHTML = '';
+        uploadBtn.disabled = true;
+    }
+}
+</script>
+</body>
+</html>

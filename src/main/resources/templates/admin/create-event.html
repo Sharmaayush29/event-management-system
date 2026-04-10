@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Create Event — EventFlow</title>
+    <meta name="description" content="Admin panel to create a new event."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">➕ Create New Event</h1>
+            <p class="page-subtitle">Fill in the details to add a new event</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline">← Back to Dashboard</a>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <div style="max-width: 800px;">
+        <div class="card">
+            <form th:action="@{/admin/events/create}" method="post" id="create-event-form">
+
+                <div class="form-group">
+                    <label class="form-label" for="title">🎪 Event Title *</label>
+                    <input type="text" id="title" name="title" class="form-control"
+                           placeholder="e.g. Annual Tech Conference 2025"
+                           required maxlength="200"/>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="category">📂 Category *</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Conference">Conference</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">📝 Short Description</label>
+                    <textarea id="description" name="description" class="form-control"
+                              rows="2"
+                              placeholder="Brief summary for listings..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="agenda">📋 Detailed Agenda</label>
+                    <textarea id="agenda" name="agenda" class="form-control"
+                              rows="6"
+                              placeholder="Timeline, speakers, topics..."></textarea>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="date">📆 Event Date *</label>
+                        <input type="date" id="date" name="date" class="form-control" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="location">📍 Location *</label>
+                        <input type="text" id="location" name="location" class="form-control"
+                               placeholder="e.g. Hall A, Conv Center"
+                               required maxlength="200"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="maxCapacity">👥 Max Capacity *</label>
+                        <input type="number" id="maxCapacity" name="maxCapacity" class="form-control"
+                               value="100" min="1" required/>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:1rem; margin-top:1.25rem;">
+                    <button type="submit" id="create-btn" class="btn btn-primary btn-lg">
+                        🚀 Create Event
+                    </button>
+                    <a th:href="@{/admin/dashboard}" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+// Set min date to today
+document.getElementById('date').min = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

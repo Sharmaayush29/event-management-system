@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Upcoming Events — EventFlow</title>
+    <meta name="description" content="Browse and register for all upcoming events."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📅 Upcoming Events</h1>
+            <p class="page-subtitle">Browse and register for future events</p>
+        </div>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Empty State -->
+    <div th:if="${events.isEmpty()}" class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No Upcoming Events</h3>
+        <p>Check back soon — new events will be added!</p>
+    </div>
+
+    <!-- Events Grid -->
+    <div th:unless="${events.isEmpty()}" class="events-grid">
+        <div th:each="event : ${events}" class="event-card">
+
+            <div class="event-card-header">
+                <div>
+                    <h2 class="event-title" th:text="${event.title}">Event Title</h2>
+                    <span class="badge badge-upcoming">📅 Upcoming</span>
+                </div>
+            </div>
+
+            <div class="event-card-body">
+                <p class="event-description" th:text="${event.description}">Description</p>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <span class="icon">📆</span>
+                        <span th:text="${#temporals.format(event.date, 'EEEE, dd MMMM yyyy')}">Date</span>
+                    </div>
+                    <div class="event-meta-item">
+                        <span class="icon">📍</span>
+                        <span th:text="${event.location}">Location</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card-footer">
+                <!-- Already registered -->
+                <div th:if="${registeredEventIds.contains(event.id)}" style="display:flex; gap:0.75rem; width:100%; align-items:center;">
+                    <span class="badge badge-completed" style="flex:1; justify-content:center;">✅ Registered</span>
+                    <form th:action="@{/events/{id}/cancel(id=${event.id})}" method="post"
+                          onsubmit="return confirm('Cancel registration for this event?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                    </form>
+                </div>
+
+                <!-- Not yet registered -->
+                <div th:unless="${registeredEventIds.contains(event.id)}" style="width:100%;">
+                    <form th:action="@{/events/{id}/register(id=${event.id})}" method="post"
+                          style="width:100%;">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            🎫 Register Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

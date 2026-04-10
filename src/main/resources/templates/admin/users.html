@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Manage Users — EventFlow Admin</title>
+    <meta name="description" content="Admin user management panel with roll number tracking."/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        .users-hero {
+            background: linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(108,99,255,0.08) 100%);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: 18px;
+            padding: 1.75rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .users-hero h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+        .users-hero p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .pro-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+        .pro-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .pro-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .count-badge {
+            background: rgba(108,99,255,0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(108,99,255,0.25);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+        .search-bar-wrap { position: relative; }
+        .search-bar-wrap input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem 0.9rem 0.5rem 2.4rem;
+            color: var(--text-primary);
+            font-size: 0.84rem;
+            font-family: 'Inter', sans-serif;
+            width: 220px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-bar-wrap input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+            width: 260px;
+        }
+        .search-bar-wrap::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+        .pro-table { width: 100%; border-collapse: collapse; }
+        .pro-table thead th {
+            background: rgba(255,255,255,0.03);
+            padding: 0.85rem 1.4rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .pro-table tbody td {
+            padding: 0.95rem 1.4rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(42,42,74,0.6);
+            vertical-align: middle;
+        }
+        .pro-table tbody tr:last-child td { border-bottom: none; }
+        .pro-table tbody tr { transition: background 0.15s; }
+        .pro-table tbody tr:hover td { background: rgba(108,99,255,0.04); }
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .user-avatar-pro {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c63ff, #f472b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        .user-avatar-pro.admin-av {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+        }
+        .user-info strong {
+            display: block;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+        }
+        .user-info small {
+            color: var(--text-muted);
+            font-size: 0.77rem;
+        }
+        .roll-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(167,139,250,0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(167,139,250,0.25);
+            padding: 0.28rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+        }
+        .roll-badge.na {
+            background: rgba(100,116,139,0.08);
+            color: var(--text-muted);
+            border-color: rgba(100,116,139,0.15);
+        }
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .role-badge.user {
+            background: rgba(59,130,246,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+        .role-badge.admin {
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+        .serial-num {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.9rem;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.25);
+            color: #4ade80;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-export:hover {
+            background: rgba(34,197,94,0.2);
+            transform: translateY(-1px);
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body class="app-wrapper">
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="main-content">
+
+    <!-- Hero -->
+    <div class="users-hero">
+        <div>
+            <h1>👥 User Management</h1>
+            <p>
+                <span th:text="${users.size()}">0</span> registered students & admins in the system
+            </p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline">← Dashboard</a>
+    </div>
+
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <div class="pro-card">
+        <div class="pro-card-header">
+            <div class="pro-card-title">
+                🎓 All Registered Users
+                <span class="count-badge" th:text="${users.size()} + ' total'">0 total</span>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                <div class="search-bar-wrap">
+                    <input type="text" id="userSearch" placeholder="Search name, roll, email..."
+                           oninput="filterTable(this, 'usersTable')"/>
+                </div>
+                <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="pro-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Roll No.</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user, stat : ${users}">
+                        <td>
+                            <div class="serial-num" th:text="${stat.count}">1</div>
+                        </td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-pro"
+                                     th:classappend="${user.role.name() == 'ADMIN' ? ' admin-av' : ''}"
+                                     th:text="${#strings.substring(user.name, 0, 1).toUpperCase()}">U</div>
+                                <div class="user-info">
+                                    <strong th:text="${user.name}">Name</strong>
+                                    <small th:text="${'ID: ' + user.id}">ID: 1</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="roll-badge"
+                                  th:if="${user.rollNo != null and !user.rollNo.isEmpty()}"
+                                  th:text="${user.rollNo}">22CS101</span>
+                            <span class="roll-badge na"
+                                  th:if="${user.rollNo == null or user.rollNo.isEmpty()}">— N/A —</span>
+                        </td>
+                        <td>
+                            <span style="color:var(--text-secondary);" th:text="${user.email}">email@example.com</span>
+                        </td>
+                        <td>
+                            <span class="role-badge user" th:if="${user.role.name() == 'USER'}">👤 Student</span>
+                            <span class="role-badge admin" th:if="${user.role.name() == 'ADMIN'}">⚙️ Admin</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+<script>
+function filterTable(input, tableId) {
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelector('#' + tableId + ' tbody').querySelectorAll('tr');
+    rows.forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+    });
+}
+
+function exportCSV() {
+    const table = document.getElementById('usersTable');
+    if (!table) return;
+    let csv = [];
+    table.querySelectorAll('tr').forEach(row => {
+        const cols = row.querySelectorAll('th, td');
+        csv.push(Array.from(cols).map(c => '"' + c.innerText.replace(/"/g, '""').trim() + '"').join(','));
+    });
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'users.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
